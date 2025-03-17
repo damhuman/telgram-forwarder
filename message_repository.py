@@ -77,8 +77,12 @@ class MessageRepository:
         """
         try:
             user = await self._client.get_entity(user_id)
-            if user.username:
+            if user.username and user.username.strip():
+                logger.info(f"Found valid username '{user.username}' for user {user_id}")
                 return f"{user.username}"
+            
+            # Якщо username порожній або None, використовуємо ID
+            logger.info(f"Username is empty or None for user {user_id}, using ID instead")
             return f"{user_id}"
         except Exception as e:
             logger.error(f"Error getting user entity: {e}")
@@ -108,6 +112,8 @@ class MessageRepository:
             
             # Format the message with wrapped link
             formatted_text = f"#{user_identifier} - {message.text or ''} - [to_chat]({message_link})"
+            
+            logger.info(f"Sending formatted message with user identifier: #{user_identifier}")
             
             # Send new message
             new_message = await self._client.send_message(
@@ -168,6 +174,8 @@ class MessageRepository:
             
             # Format the message with wrapped link
             formatted_text = f"#{user_identifier} - {message.text or ''} - [to_chat]({message_link})"
+            
+            logger.info(f"Sending formatted reply with user identifier: #{user_identifier}")
             
             # Send as a reply to the forwarded replied message
             new_message = await self._client.send_message(
